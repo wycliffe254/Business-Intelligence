@@ -1,0 +1,143 @@
+"""Executive Business Health Report generation.
+
+Produces a self-contained HTML report (works as a simple, printable
+"PDF-like" report via the browser's print function) containing the
+executive summary, KPI summary, Financial Health Score, RAG status, top
+drivers, explanations, recommendations, and data-quality limitations.
+"""
+
+from __future__ import annotations
+
+from datetime import datetime
+
+from src.utils.formatting import kes, pct, rag_color
+
+
+def build_html_report(
+    kpis: dict,
+    health_result,
+    rag_result,
+    dq_report,
+    drivers: list,
+    explanation_cards: list,
+    recommendations: list,
+    executive_summary: str,
+) -> str:
+    core = kpis["core"]
+    generated = datetime.now().strftime("%Y-%m-%d %H:%M")
+
+    def _rows_components():
+        html = ""
+        for comp in health_result.components:
+            html += (
+                f"<tr><td>{comp.name}</td><td style='text-align:right'>"
+                f"{comp.points:.1f} / {comp.max_points}</td></tr>"
+            )
+        return html
+
+    def _rows_drivers():
+        html = ""
+        for d in drivers:
+            if not d.triggered:
+                continue
+            html += f"<li><strong>{d.name}</strong>: {d.narrative}</li>"
+        return html or "<li>No major risk drivers were triggered.</li>"
+
+    def _rows_explanations():
+        html = ""
+        for c in explanation_cards:
+            html += (
+                "<div class='card'>"
+                f"<p><strong>Finding:</strong> {c.finding}</p>"
+                f"<p><strong>Evidence:</strong> {c.evidence}</p>"
+                f"<p><strong>Driver:</strong> {c.driver}</p>"
+                f"<p><strong>Impact:</strong> {c.impact}</p>"
+                f"<p><strong>Recommendation:</strong> {c.recommendation}</p>"
+                "</div>"
+            )
+        return html
+
+    def _rows_recs():
+        html = ""
+        for r in recommendations:
+            html += (
+                "<div class='card'>"
+                f"<p><strong>Priority {r.priority} \u2014 {r.title}</strong> ({r.category})</p>"
+                f"<p><em>Observed issue:</em> {r.observed_issue}</p>"
+                f"<p><em>Evidence:</em> {r.evidence}</p>"
+                f"<p><em>Management action:</em> {r.management_action}</p>"
+                "</div>"
+            )
+        return html
+
+    def _rows_limitations():
+        return "".join(f"<li>{lim}</li>" for lim in dq_report.limitations) or "<li>None identified.</li>"
+
+    html = f"""
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Business Health Report</title>
+<style>
+  body {{ font-family: Arial, Helvetica, sans-serif; margin: 40px; color: #222; }}
+  h1 {{ font-size: 22px; }}
+  h2 {{ font-size: 17px; border-bottom: 2px solid #ddd; padding-bottom: 4px; margin-top: 30px; }}
+  table {{ border-collapse: collapse; width: 100%; margin: 10px 0; }}
+  td, th {{ border: 1px solid #ddd; padding: 6px 10px; font-size: 14px; }}
+  .badge {{ display:inline-block; padding: 4px 14px; border-radius: 12px; color: white; font-weight: bold; }}
+  .card {{ background:#f7f7f7; border-left: 4px solid #888; padding: 10px 14px; margin: 10px 0; }}
+  .kpi-grid {{ display:flex; flex-wrap:wrap; gap: 14px; }}
+  .kpi-box {{ border:1px solid #ddd; border-radius:6px; padding:10px 16px; min-width:180px; }}
+  .small {{ color:#666; font-size:12px; }}
+</style>
+</head>
+<body>
+<h1>Explainable BI &amp; Financial Health Report</h1>
+<p class="small">Generated {generated}</p>
+
+<h2>Business Health Overview</h2>
+<p>
+Financial Health Score: <strong>{health_result.total_score:.1f} / 100</strong> &nbsp;
+<span class="badge" style="background-color:{rag_color(rag_result.status)};">{rag_result.status}</span>
+&nbsp;&nbsp; Data Reliability: <strong>{dq_report.status}</strong> ({dq_report.overall_score:.0f}/100)
+</p>
+
+<h2>Executive Summary</h2>
+<p>{executive_summary}</p>
+
+<h2>KPI Summary</h2>
+<div class="kpi-grid">
+  <div class="kpi-box"><div class="small">Adjusted Revenue</div><div>{kes(core['adjusted_revenue'])}</div></div>
+  <div class="kpi-box"><div class="small">Gross Profit</div><div>{kes(core['gross_profit'])}</div></div>
+  <div class="kpi-box"><div class="small">Gross Margin</div><div>{pct(core['gross_margin_pct'])}</div></div>
+  <div class="kpi-box"><div class="small">Operating Profit</div><div>{kes(core['operating_profit'])}</div></div>
+  <div class="kpi-box"><div class="small">Operating Margin</div><div>{pct(core['operating_margin_pct'])}</div></div>
+  <div class="kpi-box"><div class="small">Operating Expense Ratio</div><div>{pct(core['opex_ratio_pct'])}</div></div>
+</div>
+
+<h2>Financial Health Score Components</h2>
+<table>
+<tr><th>Component</th><th>Score</th></tr>
+{_rows_components()}
+</table>
+
+<h2>Top Drivers</h2>
+<ul>{_rows_drivers()}</ul>
+
+<h2>Explainable Insights</h2>
+{_rows_explanations()}
+
+<h2>Recommendations</h2>
+{_rows_recs()}
+
+<h2>Data Quality Limitations</h2>
+<ul>{_rows_limitations()}</ul>
+
+<p class="small">This report is generated by a prototype academic decision-support
+system. It does not constitute accounting, tax, or financial advisory
+services, and does not guarantee future business performance.</p>
+</body>
+</html>
+"""
+    return html
