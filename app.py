@@ -128,7 +128,7 @@ def main():
 
     st.divider()
     st.caption(
-        "This is a prototype academic decision-support system. It does not "
+        "This is a decision-support system. It does not "
         "replace professional accounting, tax, or financial advisory "
         "services, and does not guarantee future business performance. "
         "Use the pages in the left sidebar to explore the full analysis."
