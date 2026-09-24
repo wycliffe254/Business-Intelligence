@@ -127,12 +127,12 @@ def main():
     st.write(result["executive_summary"])
 
     st.divider()
-    st.caption(
-        "This is a decision-support system. It does not "
-        "replace professional accounting, tax, or financial advisory "
-        "services, and does not guarantee future business performance. "
-        "Use the pages in the left sidebar to explore the full analysis."
-    )
+    # st.caption(
+    #     "This is a decision-support system. It does not "
+    #     "replace professional accounting, tax, or financial advisory "
+    #     "services, and does not guarantee future business performance. "
+    #     "Use the pages in the left sidebar to explore the full analysis."
+    # )
 
 
 if __name__ == "__main__":
