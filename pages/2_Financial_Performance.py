@@ -45,12 +45,22 @@ monthly = kpis["monthly"]
 
 st.caption("Filters apply to this page's charts and tables only.")
 
-c1, c2, c3, c4, c5 = st.columns(5)
-c1.metric("Adjusted Revenue", kes(core["adjusted_revenue"], millions=True))
-c2.metric("Gross Profit", kes(core["gross_profit"], millions=True))
-c3.metric("Gross Margin", pct(core["gross_margin_pct"]))
-c4.metric("Operating Profit", kes(core["operating_profit"], millions=True))
-c5.metric("Operating Margin", pct(core["operating_margin_pct"]))
+# c1, c2, c3, c4, c5 = st.columns(5)
+# c1.metric("Adjusted Revenue", kes(core["adjusted_revenue"], millions=True))
+# c2.metric("Gross Profit", kes(core["gross_profit"], millions=True))
+# c3.metric("Gross Margin", pct(core["gross_margin_pct"]))
+# c4.metric("Operating Profit", kes(core["operating_profit"], millions=True))
+# c5.metric("Operating Margin", pct(core["operating_margin_pct"]))
+
+r1c1, r1c2, r1c3 = st.columns(3)
+r1c1.metric("Adjusted Revenue", kes(core["adjusted_revenue"]))
+r1c2.metric("Gross Profit", kes(core["gross_profit"]))
+r1c3.metric("Gross Margin", pct(core["gross_margin_pct"]))
+ 
+r2c1, r2c2 = st.columns(2)
+r2c1.metric("Operating Profit", kes(core["operating_profit"]))
+r2c2.metric("Operating Margin", pct(core["operating_margin_pct"]))
+ 
 
 st.subheader("Revenue, Gross Profit & Operating Profit Trend")
 fig = go.Figure()
