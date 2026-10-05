@@ -273,7 +273,7 @@ of financial health: **Green** = healthy/acceptable, **Amber** =
 requires attention, **Red** = significant concern. A Red status can
 also be triggered directly by a **critical-risk override** (e.g.
 persistent losses, a severe revenue drop) even if the numeric score
-alone would suggest Amber — the app always explains why when this
+alone would suggest Amber — the app always explains why and when this
 happens.
 
 **Driver** — A specific, rule-based, evidence-backed reason
